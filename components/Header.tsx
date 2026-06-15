@@ -1,0 +1,171 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useRef, useState, useEffect, useCallback } from "react";
+
+const NAV_LINKS = [
+  { href: "/galerie", label: "Galerie" },
+  { href: "https://karlduponchel.fr", label: "Portfolio" },
+  { href: "/contact", label: "Contact" },
+];
+
+function Header() {
+  const pathname = usePathname();
+  const navRef = useRef<HTMLDivElement>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [pill, setPill] = useState({ left: 0, width: 0, opacity: 0 });
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const activeIndex = NAV_LINKS.findIndex(({ href }) => pathname === href);
+
+  const movePill = useCallback((index: number) => {
+    const link = linkRefs.current[index];
+    const nav = navRef.current;
+    if (!link || !nav) return;
+    const navRect = nav.getBoundingClientRect();
+    const linkRect = link.getBoundingClientRect();
+    setPill({
+      left: linkRect.left - navRect.left,
+      width: linkRect.width,
+      opacity: 1,
+    });
+  }, []);
+
+  const resetPill = useCallback(() => {
+    if (activeIndex >= 0) {
+      movePill(activeIndex);
+    } else {
+      setPill((prev) => ({ ...prev, opacity: 0 }));
+    }
+  }, [activeIndex, movePill]);
+
+  useEffect(() => {
+    resetPill();
+  }, [resetPill]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  return (
+    <header className="flex items-center justify-center w-full py-4 px-4 md:py-6">
+      {/* Desktop nav */}
+      <nav
+        ref={navRef}
+        className="relative hidden md:flex gap-2 items-center w-2/3 rounded-full py-2 px-4 bg-surface shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]"
+        onMouseLeave={resetPill}
+      >
+        <Link href="/" className="font-heading text-lg mr-auto pl-2">
+          kduponchel
+        </Link>
+
+        <div
+          className="absolute top-1/2 -translate-y-1/2 h-[calc(100%-16px)] rounded-full bg-foreground/10 transition-all duration-300 ease-out pointer-events-none"
+          style={{
+            left: pill.left,
+            width: pill.width,
+            opacity: pill.opacity,
+          }}
+        />
+
+        {NAV_LINKS.map(({ href, label }, i) => {
+          const isActive = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              ref={(el) => { linkRefs.current[i] = el; }}
+              onMouseEnter={() => movePill(i)}
+              className={`relative z-10 px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                isActive
+                  ? "text-foreground"
+                  : "text-foreground-soft hover:text-foreground"
+              }`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Mobile nav bar */}
+      <nav className="flex md:hidden items-center justify-between w-full rounded-full py-2 px-4 bg-surface shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]">
+        <Link href="/" className="font-heading text-lg pl-2">
+          kduponchel
+        </Link>
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+          aria-label="Ouvrir le menu"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
+        </button>
+      </nav>
+
+      {/* Mobile overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 md:hidden ${
+          mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      {/* Mobile slide panel */}
+      <div
+        className={`fixed top-0 right-0 z-50 h-full w-72 bg-surface shadow-[-4px_0_24px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-out md:hidden ${
+          mobileOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-6">
+          <span className="font-heading text-lg">Menu</span>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="p-2 rounded-full hover:bg-foreground/10 transition-colors"
+            aria-label="Fermer le menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex flex-col px-4 gap-1">
+          {NAV_LINKS.map(({ href, label }) => {
+            const isActive = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMobileOpen(false)}
+                className={`px-4 py-3 rounded-xl text-base font-medium transition-colors duration-200 ${
+                  isActive
+                    ? "bg-foreground/10 text-foreground"
+                    : "text-foreground-soft hover:bg-foreground/5 hover:text-foreground"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export default Header;
