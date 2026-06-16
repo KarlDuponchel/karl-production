@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { useRef, useState, useEffect, useCallback } from "react";
 
 const NAV_LINKS = [
-  { href: "/galerie", label: "Galerie" },
-  { href: "https://karlduponchel.fr", label: "Portfolio" },
-  { href: "/contact", label: "Contact" },
+  { href: "/galerie", label: "Galerie", isExternal: false },
+  { href: "https://karlduponchel.fr", label: "Portfolio", isExternal: true },
+  { href: "/contact", label: "Contact", isExternal: false },
 ];
 
 function Header() {
@@ -58,11 +58,11 @@ function Header() {
   }, [pathname]);
 
   return (
-    <header className="flex items-center justify-center w-full py-4 px-4 md:py-6">
+    <header className="flex items-center justify-center w-full py-4 px-4 md:py-6 fixed z-50">
       {/* Desktop nav */}
       <nav
         ref={navRef}
-        className="relative hidden md:flex gap-2 items-center w-2/3 rounded-full py-2 px-4 bg-surface shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]"
+        className="relative hidden md:flex gap-2 items-center w-2/3 rounded-full py-2 px-4 bg-surface/55 backdrop-blur-xl backdrop-saturate-150 border border-white/40 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]"
         onMouseLeave={resetPill}
       >
         <Link href="/" className="font-heading text-lg mr-auto pl-2">
@@ -78,13 +78,14 @@ function Header() {
           }}
         />
 
-        {NAV_LINKS.map(({ href, label }, i) => {
+        {NAV_LINKS.map(({ href, label, isExternal }, i) => {
           const isActive = pathname === href;
           return (
             <Link
               key={href}
               href={href}
               ref={(el) => { linkRefs.current[i] = el; }}
+              target={isExternal ? "_blank" : ""}
               onMouseEnter={() => movePill(i)}
               className={`relative z-10 px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                 isActive
@@ -99,7 +100,7 @@ function Header() {
       </nav>
 
       {/* Mobile nav bar */}
-      <nav className="flex md:hidden items-center justify-between w-full rounded-full py-2 px-4 bg-surface shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]">
+      <nav className="flex md:hidden items-center justify-between w-full rounded-full py-2 px-4 bg-surface/55 backdrop-blur-xl backdrop-saturate-150 border border-white/40 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]">
         <Link href="/" className="font-heading text-lg pl-2">
           kduponchel
         </Link>
