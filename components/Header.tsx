@@ -16,6 +16,14 @@ function Header() {
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [pill, setPill] = useState({ left: 0, width: 0, opacity: 0 });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const activeIndex = NAV_LINKS.findIndex(({ href }) => pathname === href);
 
@@ -58,14 +66,14 @@ function Header() {
   }, [pathname]);
 
   return (
-    <header className="flex items-center justify-center w-full py-4 px-4 md:py-6 fixed z-50">
+    <header className={`flex text-lime-50 items-center justify-center w-full px-4 fixed z-50 transition-all duration-300 ${scrolled ? "py-2 md:py-3" : "py-4 md:py-6"}`}>
       {/* Desktop nav */}
       <nav
         ref={navRef}
-        className="relative hidden md:flex gap-2 items-center w-2/3 rounded-full py-2 px-4 bg-surface/55 backdrop-blur-xl backdrop-saturate-150 border border-white/40 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]"
+        className={`relative hidden md:flex gap-2 items-center rounded-full px-4 bg-mossy-olive-950/55 backdrop-blur-xl backdrop-saturate-150 border border-white/40 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] transition-all duration-300 ${scrolled ? "w-[60%] py-1.5" : "w-2/3 py-2"}`}
         onMouseLeave={resetPill}
       >
-        <Link href="/" className="font-heading text-lg mr-auto pl-2">
+        <Link href="/" className={`font-heading mr-auto pl-2 transition-all duration-300 ${scrolled ? "text-base" : "text-lg"}`}>
           kduponchel
         </Link>
 
@@ -89,8 +97,8 @@ function Header() {
               onMouseEnter={() => movePill(i)}
               className={`relative z-10 px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                 isActive
-                  ? "text-foreground"
-                  : "text-foreground-soft hover:text-foreground"
+                  ? "text-lime-50"
+                  : "text-lime-50/70 hover:text-lime-50"
               }`}
             >
               {label}
@@ -100,7 +108,7 @@ function Header() {
       </nav>
 
       {/* Mobile nav bar */}
-      <nav className="flex md:hidden items-center justify-between w-full rounded-full py-2 px-4 bg-surface/55 backdrop-blur-xl backdrop-saturate-150 border border-white/40 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]">
+      <nav className="flex md:hidden items-center justify-between w-full rounded-full py-2 px-4 bg-mossy-olive-950/55 backdrop-blur-xl backdrop-saturate-150 border border-white/40 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]">
         <Link href="/" className="font-heading text-lg pl-2">
           kduponchel
         </Link>
@@ -127,7 +135,7 @@ function Header() {
 
       {/* Mobile slide panel */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-72 bg-surface shadow-[-4px_0_24px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed top-0 right-0 z-50 h-full w-72 bg-mossy-olive-950 shadow-[-4px_0_24px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-out md:hidden ${
           mobileOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -155,8 +163,8 @@ function Header() {
                 onClick={() => setMobileOpen(false)}
                 className={`px-4 py-3 rounded-xl text-base font-medium transition-colors duration-200 ${
                   isActive
-                    ? "bg-foreground/10 text-foreground"
-                    : "text-foreground-soft hover:bg-foreground/5 hover:text-foreground"
+                    ? "bg-foreground/10 text-lime-50"
+                    : "text-lime-50/70 hover:bg-foreground/5 hover:text-lime-50"
                 }`}
               >
                 {label}
